@@ -137,7 +137,7 @@ Allows users to search the shipments page by shipment ID, date, status, price, a
 ![image](https://user-images.githubusercontent.com/113552143/201818981-f3b0ed64-f046-4508-bb3a-064c49d94b54.png)
 ![image](https://user-images.githubusercontent.com/113552143/201820384-a5988e4d-a00d-4535-a4a4-366fd511c2b2.png)
 
-#### Warehouse GUI for Modifying and Reviewing Inventory
+#### Warehouse GUI for Modifying and Reviewing Inventory 
 
 Allows for the viewing of warehouse inventory, adding/removing of items, and viewing of change history. The example image shows warehouse 123 after an item with ID 123 was added. 
 ![image](https://user-images.githubusercontent.com/113552143/201820182-68c32d32-b3ef-4909-9473-6f341ea59751.png)
