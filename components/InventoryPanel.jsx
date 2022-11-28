@@ -28,40 +28,50 @@ export class Warehouse {
     }
 
     // add an item to the inventory
-    addItem(item_id, item_name, item_quantity) {
-        this.inventory.push({ item_id, item_name, item_quantity });
+    addItem(item_id, item_name, item_quantity, item_vol) {
+        this.inventory.push({ item_id, item_name, item_quantity, item_vol });
         let status = "+" + item_quantity;
-        this.changes.push({status, item_id, item_name, item_quantity });
+        this.changes.push({status, item_id, item_name, item_quantity, item_vol });
+        this.remaining_space=this.remaining_space-item_vol*item_quantity;
     }
 
     // remove an item from the inventory
-    removeItem(item_id, item_name, item_quantity) {
+    removeItem(item_id, item_name, item_quantity, item_vol) {
         this.inventory = this.inventory.filter(
             (item) => item.item_id !== item_id
         );
         let status = "-" + item_quantity;
-        this.changes.push({ status, item_id, item_name, item_quantity });
+        this.changes.push({ status, item_id, item_name, item_quantity, item_vol });
+        this.remaining_space=this.remaining_space+item_vol*item_quantity;
     }
 
     // update the quantity of an item in the inventory
-    updateItem(item_id, item_name, item_quantity) {
+    updateItem(item_id, item_name, item_quantity, item_vol) {
         this.inventory.forEach((item) => {
             if (item.item_id === item_id) {
                 item.item_quantity = item_quantity;
+                item.item_vol=item_vol;
             }
         });
         if (item.item_quantity < item_quantity){
             let status = "+" + item_quantity;
+            this.remaining_space=this.remaining_space-item_vol*item_quantity;
         } else{
             let status = "-" + item_quantity;
+            this.remaining_space=this.remaining_space+item_vol*item_quantity;
         }
-        this.changes.push({ status, item_id, item_name, item_quantity });
+        this.changes.push({ status, item_id, item_name, item_quantity, item_vol });
     }
 
     // get the quantity of an item in the inventory
     getItemQuantity(item_id) {
         let item = this.inventory.find((item) => item.item_id === item_id);
         return item.item_quantity;
+    }
+
+    getItemVol(item_id) {
+        let item = this.inventory.find((item) => item.item_id === item_id);
+        return item.item_vol;
     }
 
     // get the name of an item in the inventory
@@ -93,6 +103,7 @@ export function InventoryPanel({ inventoryItems }) {
     const [itemList, setItemList] = useState([]);
     const [item, setItem] = useState("");
     const [quantity, setQuantity] = useState(0);
+    const [vol, setVol] = useState(0);
     const [warehouse, setWarehouse] = useState(0);
     const [warehouseSpace, setWarehouseSpace] = useState(0);
     const [warehouseSpaceRemaining, setWarehouseSpaceRemaining] = useState(0);
@@ -137,7 +148,9 @@ export function InventoryPanel({ inventoryItems }) {
         let item_id = item;
         let item_name = item;
         let item_quantity = quantity;
+        let item_vol = vol;
         let total_quantity = quantity;
+        let total_vol = vol;
         let warehouse_id = warehouse;
         let warehouse_space = warehouseSpace;
         let warehouse_space_remaining = warehouseSpaceRemaining;
@@ -148,7 +161,7 @@ export function InventoryPanel({ inventoryItems }) {
         let status = "+" + item_quantity;
 
         // check if the warehouse is full
-        if (warehouse_space_remaining < item_quantity) {
+        if (warehouse_space_remaining < item_quantity*item_vol) {
             alert("Warehouse is full");
             return;
         }
@@ -156,6 +169,11 @@ export function InventoryPanel({ inventoryItems }) {
         // check if the quantity is valid
         if (item_quantity <= 0) {
             alert("Invalid quantity");
+            return;
+        }
+        
+        if (item_vol <= 0) {
+            alert("Invalid volume");
             return;
         }
 
@@ -172,16 +190,20 @@ export function InventoryPanel({ inventoryItems }) {
             warehouse_inventory_object.forEach((item) => {
                 if (item.item_id === item_id) {
                     item.item_quantity = item.item_quantity - -item_quantity;
+                    item.item_vol = item.item_vol - -item_vol;
                     total_quantity = item.item_quantity;
+                    total_vol = item.item_vol;
                 }
             });
-            warehouse_object.remaining_space -= item_quantity;
+            warehouse_object.remaining_space -= item_quantity*item_vol;
             warehouse_object.changes.push({
                 status,
                 item_id,
                 item_name,
                 item_quantity,
+                item_vol,
                 total_quantity,
+                total_vol,
             });
             setWarehouseSpaceRemaining(warehouse_object.remaining_space);
             setWarehouseInventory(warehouse_inventory_object);
@@ -189,13 +211,13 @@ export function InventoryPanel({ inventoryItems }) {
         }
 
         // add the item to the warehouse
-        warehouse_inventory_object.push({ item_id, item_name, item_quantity });
+        warehouse_inventory_object.push({ item_id, item_name, item_quantity, item_vol });
         warehouse_object.inventory = warehouse_inventory_object;
         warehouse_object.remaining_space =
-            warehouse_space_remaining - item_quantity;
+            warehouse_space_remaining - item_quantity*item_vol;
         warehouse_list[warehouse_id] = warehouse_object;
         setWarehouseList(warehouse_list);
-        setWarehouseSpaceRemaining(warehouse_space_remaining - item_quantity);
+        setWarehouseSpaceRemaining(warehouse_space_remaining - item_quantity*item_vol);
         setWarehouseInventory(warehouse_inventory_object);
     };
 
@@ -205,7 +227,9 @@ export function InventoryPanel({ inventoryItems }) {
         let item_id = item;
         let item_name = item;
         let item_quantity = quantity;
+        let item_vol = vol;
         let total_quantity = quantity;
+        let total_vol = vol;
         let warehouse_id = warehouse;
         let warehouse_space = warehouseSpace;
         let warehouse_space_remaining = warehouseSpaceRemaining;
@@ -236,6 +260,11 @@ export function InventoryPanel({ inventoryItems }) {
             return;
         }
 
+        if (item_vol <= 0) {
+            alert("Invalid volume");
+            return;
+        }
+
         // remove the item from the warehouse
         warehouse_inventory_object.forEach((item) => {
             if (item.item_id === item_id) {
@@ -243,8 +272,13 @@ export function InventoryPanel({ inventoryItems }) {
                     alert("Invalid quantity");
                     return;
                 }
+                if (item.item_vol - 0 < item_vol) {
+                    alert("Double check volume/storage space");
+                }
                 item.item_quantity -= item_quantity;
+                item.item_vol -= item_vol;
                 total_quantity = item.item_quantity;
+                total_vol = item.item_vol;
                 if (item.item_quantity === 0) {
                     warehouse_inventory_object.splice(
                         warehouse_inventory_object.indexOf(item),
@@ -256,10 +290,12 @@ export function InventoryPanel({ inventoryItems }) {
             status,
             item_id,
             item_name,
-            item_quantity: item_quantity,
+            item_quantity,//: item_quantity,
+            item_vol,//: item_vol,
             total_quantity,
+            total_vol,
         });
-        setWarehouseSpaceRemaining(warehouse_space_remaining - -item_quantity);
+        setWarehouseSpaceRemaining(warehouse_space_remaining - -item_quantity*item_vol);
         setWarehouseInventory(warehouse_inventory_object);
     };
 
@@ -314,7 +350,7 @@ export function InventoryPanel({ inventoryItems }) {
                         <li key={index}>
                             <p>
                                 Item ID: {item.item_id} Quantity:{" "}
-                                {item.item_quantity}
+                                {item.item_quantity} Volume:{" "} {item.item_vol}
                             </p>
                         </li>
                     ))}
@@ -347,6 +383,17 @@ export function InventoryPanel({ inventoryItems }) {
                         />
                     </label>
                     <br />
+                    <label>
+                        Volume:
+                        <input
+                            type="(int)"
+                            value={vol}
+                            onChange={(e) => {
+                                setVol(e.target.value);
+                            }}
+                        />
+                    </label>
+                    <br />
                     <input type="button" value="Add" onClick={addItem} />
                     <input type="button" value="Remove" onClick={removeItem} />
                 </form>
@@ -360,7 +407,7 @@ export function InventoryPanel({ inventoryItems }) {
                             <li key={index}>
                                 <p>
                                     {change.status} Item ID: {change.item_id} Quantity:{" "}
-                                    {change.total_quantity}
+                                    {change.total_quantity} Volume:{" "} {change.item_vol}
                                 </p>
                             </li>
                         ))}
