@@ -11,6 +11,11 @@ import TextBox from "/components/TextBox";
 
 import Incrementor from "/components/Incrementor.jsx";
 
+var logged;
+export function loggedIn() {
+    return logged;
+}
+
 export const ProfileCellIncrementor = ({ val, onChange, disabled }) => {
     const [value, setValue] = useState(val);
 
@@ -70,6 +75,10 @@ export const ProfileTableRow = ({ profile }) => {
     const [lname, setLastName] = useState(profile.lastName);
     const [email, setEmail] = useState(profile.email);
     const [permission, setPermission] = useState(profile.permission);
+    const changeLogged = () => {
+        logged=profile;
+        alert("Logged in with Permission " + logged.permission);
+    }
 
     return (
         <tr className={styles.profileRow}>
@@ -93,6 +102,7 @@ export const ProfileTableRow = ({ profile }) => {
                 onChange={(v) => setPermission(v)}
                 disabled={false}
             />
+            <input type="button" value="Log In" onClick={changeLogged} />
         </tr>
     );
 };

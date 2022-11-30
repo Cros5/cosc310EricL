@@ -141,3 +141,13 @@ Allows users to search the shipments page by shipment ID, date, status, price, a
 
 Allows for the viewing of warehouse inventory, adding/removing of items, and viewing of change history. The example image shows warehouse 123 after an item with ID 123 was added. 
 ![image](https://user-images.githubusercontent.com/113552143/201820182-68c32d32-b3ef-4909-9473-6f341ea59751.png)
+
+## New Features
+
+#### Proper Warehouse Volume Storage Tracking
+
+The previous version of the system essentially only tracked the quantity of items stored in the warehouse. Now, users can input the volume per item when checking a quantity of items in or out and the remaining storage space will change depending on the total volume added or removed. 
+
+#### Profile Sign in and Permission Verification
+
+Users are now required to sign in through the profiles page before modifying the warehouse inventory. The warehouse panel now also requires inputting an item's permission level when adding or removing items. Users' allowed actions in the warehouse page are now restricted by their permission level in that they cannot withdraw items with a higher permission level than their own. Anyone can still add items to the warehouse, the reason for this being that warehouse workers should be able to check items in while not having a need to withdraw them. 

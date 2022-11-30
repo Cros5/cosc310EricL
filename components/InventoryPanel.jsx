@@ -3,6 +3,8 @@
 import React from "react";
 import styles from "/styles/InventoryPanel.module.css";
 import { useState, useEffect, useRef } from "react";
+import { loggedIn } from "/components/ProfilesPanel";
+import User from "/public/libs/user.js";
 
 export class Warehouse {
     constructor(
@@ -28,29 +30,30 @@ export class Warehouse {
     }
 
     // add an item to the inventory
-    addItem(item_id, item_name, item_quantity, item_vol) {
+    addItem(item_id, item_name, item_quantity, item_vol, item_perm) {
         this.inventory.push({ item_id, item_name, item_quantity, item_vol });
         let status = "+" + item_quantity;
-        this.changes.push({status, item_id, item_name, item_quantity, item_vol });
+        this.changes.push({status, item_id, item_name, item_quantity, item_vol, item_perm });
         this.remaining_space=this.remaining_space-item_vol*item_quantity;
     }
 
     // remove an item from the inventory
-    removeItem(item_id, item_name, item_quantity, item_vol) {
+    removeItem(item_id, item_name, item_quantity, item_vol, item_perm) {
         this.inventory = this.inventory.filter(
             (item) => item.item_id !== item_id
         );
         let status = "-" + item_quantity;
-        this.changes.push({ status, item_id, item_name, item_quantity, item_vol });
+        this.changes.push({ status, item_id, item_name, item_quantity, item_vol, item_perm });
         this.remaining_space=this.remaining_space+item_vol*item_quantity;
     }
 
     // update the quantity of an item in the inventory
-    updateItem(item_id, item_name, item_quantity, item_vol) {
+    updateItem(item_id, item_name, item_quantity, item_vol, item_perm) {
         this.inventory.forEach((item) => {
             if (item.item_id === item_id) {
                 item.item_quantity = item_quantity;
                 item.item_vol=item_vol;
+                item.item_perm=item_perm;
             }
         });
         if (item.item_quantity < item_quantity){
@@ -60,7 +63,7 @@ export class Warehouse {
             let status = "-" + item_quantity;
             this.remaining_space=this.remaining_space+item_vol*item_quantity;
         }
-        this.changes.push({ status, item_id, item_name, item_quantity, item_vol });
+        this.changes.push({ status, item_id, item_name, item_quantity, item_vol, item_perm });
     }
 
     // get the quantity of an item in the inventory
@@ -72,6 +75,11 @@ export class Warehouse {
     getItemVol(item_id) {
         let item = this.inventory.find((item) => item.item_id === item_id);
         return item.item_vol;
+    }
+
+    getItemPerm(item_id) {
+        let item = this.inventory.find((item) => item.item_id === item_id);
+        return item.item_perm;
     }
 
     // get the name of an item in the inventory
@@ -104,6 +112,7 @@ export function InventoryPanel({ inventoryItems }) {
     const [item, setItem] = useState("");
     const [quantity, setQuantity] = useState(0);
     const [vol, setVol] = useState(0);
+    const [perm, setPerm] = useState(0);
     const [warehouse, setWarehouse] = useState(0);
     const [warehouseSpace, setWarehouseSpace] = useState(0);
     const [warehouseSpaceRemaining, setWarehouseSpaceRemaining] = useState(0);
@@ -149,6 +158,7 @@ export function InventoryPanel({ inventoryItems }) {
         let item_name = item;
         let item_quantity = quantity;
         let item_vol = vol;
+        let item_perm = perm;
         let total_quantity = quantity;
         let total_vol = vol;
         let warehouse_id = warehouse;
@@ -159,6 +169,10 @@ export function InventoryPanel({ inventoryItems }) {
         let warehouse_object = warehouse_list[warehouse_id];
         let warehouse_inventory_object = warehouse_object.inventory;
         let status = "+" + item_quantity;
+
+        try {
+
+        loggedIn().permission;
 
         // check if the warehouse is full
         if (warehouse_space_remaining < item_quantity*item_vol) {
@@ -177,6 +191,11 @@ export function InventoryPanel({ inventoryItems }) {
             return;
         }
 
+        //if (item_perm<0 || item_perm>5) {
+        //    alert("Invalid permission");
+        //    return;
+        //}
+
         // check if the warehouse is valid
         if (warehouse_id < 0 || warehouse_id >= warehouse_list.length) {
             alert("Invalid warehouse");
@@ -191,6 +210,7 @@ export function InventoryPanel({ inventoryItems }) {
                 if (item.item_id === item_id) {
                     item.item_quantity = item.item_quantity - -item_quantity;
                     item.item_vol = item.item_vol - -item_vol;
+                    item.item_perm = item_perm;
                     total_quantity = item.item_quantity;
                     total_vol = item.item_vol;
                 }
@@ -202,6 +222,7 @@ export function InventoryPanel({ inventoryItems }) {
                 item_name,
                 item_quantity,
                 item_vol,
+                item_perm,
                 total_quantity,
                 total_vol,
             });
@@ -219,6 +240,11 @@ export function InventoryPanel({ inventoryItems }) {
         setWarehouseList(warehouse_list);
         setWarehouseSpaceRemaining(warehouse_space_remaining - item_quantity*item_vol);
         setWarehouseInventory(warehouse_inventory_object);
+        }
+        catch (error) {
+            alert("Please sign in")
+            return;
+        }
     };
 
     // remove item from warehouse
@@ -228,6 +254,7 @@ export function InventoryPanel({ inventoryItems }) {
         let item_name = item;
         let item_quantity = quantity;
         let item_vol = vol;
+        let item_perm = perm;
         let total_quantity = quantity;
         let total_vol = vol;
         let warehouse_id = warehouse;
@@ -238,6 +265,8 @@ export function InventoryPanel({ inventoryItems }) {
         let warehouse_object = warehouse_list[warehouse_id];
         let warehouse_inventory_object = warehouse_object.inventory;
         let status = "-" + item_quantity;
+
+        try {
 
         // check if the warehouse is valid
         if (warehouse_id < 0 || warehouse_id >= warehouse_list.length) {
@@ -265,6 +294,16 @@ export function InventoryPanel({ inventoryItems }) {
             return;
         }
 
+        //if (item_perm<0 || item_perm>5) {
+        //    alert("Invalid permission");
+        //    return;
+        //}
+
+        if (loggedIn().permission<item_perm) {
+            alert("Insufficient permission to withdraw item");
+            return;
+        }
+
         // remove the item from the warehouse
         warehouse_inventory_object.forEach((item) => {
             if (item.item_id === item_id) {
@@ -277,6 +316,7 @@ export function InventoryPanel({ inventoryItems }) {
                 }
                 item.item_quantity -= item_quantity;
                 item.item_vol -= item_vol;
+                item.item_perm = item_perm;
                 total_quantity = item.item_quantity;
                 total_vol = item.item_vol;
                 if (item.item_quantity === 0) {
@@ -292,11 +332,17 @@ export function InventoryPanel({ inventoryItems }) {
             item_name,
             item_quantity,//: item_quantity,
             item_vol,//: item_vol,
+            item_perm,
             total_quantity,
             total_vol,
         });
         setWarehouseSpaceRemaining(warehouse_space_remaining - -item_quantity*item_vol);
         setWarehouseInventory(warehouse_inventory_object);
+        }
+        catch (error) {
+            alert("Please sign in")
+            return;
+        }
     };
 
     // change active warehouse using warehouse_Id with dropdown menu
@@ -350,7 +396,7 @@ export function InventoryPanel({ inventoryItems }) {
                         <li key={index}>
                             <p>
                                 Item ID: {item.item_id} Quantity:{" "}
-                                {item.item_quantity} Volume:{" "} {item.item_vol}
+                                {item.item_quantity} Volume:{" "} {item.item_vol} Permission:{" "} {item.item_perm}
                             </p>
                         </li>
                     ))}
@@ -394,6 +440,16 @@ export function InventoryPanel({ inventoryItems }) {
                         />
                     </label>
                     <br />
+                    <label>
+                        Permission:
+                        <input
+                            type="number"
+                            value={perm}
+                            onChange={(e) => {
+                                setPerm(e.target.value);
+                            }}
+                        />
+                    </label>
                     <input type="button" value="Add" onClick={addItem} />
                     <input type="button" value="Remove" onClick={removeItem} />
                 </form>
@@ -407,7 +463,7 @@ export function InventoryPanel({ inventoryItems }) {
                             <li key={index}>
                                 <p>
                                     {change.status} Item ID: {change.item_id} Quantity:{" "}
-                                    {change.total_quantity} Volume:{" "} {change.item_vol}
+                                    {change.total_quantity} Volume:{" "} {change.item_vol} Permission:{" "} {change.item_perm}
                                 </p>
                             </li>
                         ))}
