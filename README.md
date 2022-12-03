@@ -146,13 +146,13 @@ Allows for the viewing of warehouse inventory, adding/removing of items, and vie
 
 #### Proper Warehouse Volume Storage Tracking
 
-The previous version of the system essentially only tracked the quantity of items stored in the warehouse. Now, users can input the volume per item when checking a quantity of items in or out and the remaining storage space will change depending on the total volume added or removed. The following image shows a warehouse with an initial remaining space of 50 after an item push with quantity 3 and volume 2 was added twice. 
+The previous version of the system essentially only tracked the quantity of items stored in the warehouse. Now, users can input the volume per item when checking a quantity of items in or out and the remaining storage space will change depending on the total volume added or removed. The following image shows a warehouse with an initial remaining space of 50 after an item push with quantity 3 and volume 2 was added twice, reducing the total remaining volume by 12. 
 
-![image](https://user-images.githubusercontent.com/113552143/204706245-37968f90-742b-4f3a-977d-a0d3184d423f.png)
+![image](https://user-images.githubusercontent.com/113552143/205430654-dfec7b43-a89c-4c1a-b74b-8d6c84f000eb.png)
 
 #### Profile Sign in and Permission Verification
 
-Users are now required to sign in through the profiles page before modifying the warehouse inventory. The warehouse panel now also requires inputting an item's permission level when adding or removing items. Users' allowed actions in the warehouse page are now restricted by their permission level in that they cannot withdraw items with a higher permission level than their own. Anyone can still add items to the warehouse, the reason for this being that warehouse workers should be able to check items in while not having a need to withdraw them. The following images show logging in as one of the available test users and an attempt to remove an item with permission 2 while the user is logged in as a profile with permission 0
+Users are now required to sign in through the profiles page before modifying the warehouse inventory. The warehouse panel now also requires inputting an item's permission level when adding or removing items. Users' allowed actions in the warehouse page are now restricted by their permission level in that they cannot withdraw items with a higher permission level than their own. Anyone can still add items to the warehouse, the reason for this being that warehouse workers should be able to check items in if unloading from a delivery truck while not having a need to withdraw items from the warehouse. The following images show logging in as one of the available test users and an attempt to remove an item with permission 2 while the user is logged in as a profile with permission 0
 
-![image](https://user-images.githubusercontent.com/113552143/204706318-1cfccc82-2dae-4998-b25b-0d9d44e5038f.png)
-![image](https://user-images.githubusercontent.com/113552143/204706339-e80cc846-3cd1-4823-aaf8-0adb26bf6d8f.png)
+![image](https://user-images.githubusercontent.com/113552143/205430713-617b7dcb-9cb0-469f-996e-1872d3676054.png)
+![image](https://user-images.githubusercontent.com/113552143/205430671-451aee47-c27c-494e-9500-cb939c7634af.png)
