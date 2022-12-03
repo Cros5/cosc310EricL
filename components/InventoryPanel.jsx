@@ -209,7 +209,7 @@ export function InventoryPanel({ inventoryItems }) {
             warehouse_inventory_object.forEach((item) => {
                 if (item.item_id === item_id) {
                     item.item_quantity = item.item_quantity - -item_quantity;
-                    item.item_vol = item.item_vol - -item_vol;
+                    item.item_vol = item_vol;
                     item.item_perm = item_perm;
                     total_quantity = item.item_quantity;
                     total_vol = item.item_vol;
@@ -315,7 +315,7 @@ export function InventoryPanel({ inventoryItems }) {
                     alert("Double check volume/storage space");
                 }
                 item.item_quantity -= item_quantity;
-                item.item_vol -= item_vol;
+                item.item_vol = item_vol;
                 item.item_perm = item_perm;
                 total_quantity = item.item_quantity;
                 total_vol = item.item_vol;
